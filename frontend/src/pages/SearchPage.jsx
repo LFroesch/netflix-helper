@@ -113,6 +113,7 @@ const SearchPage = () => {
 						return (
 							<div key={result.id} className='bg-gray-800 p-4 rounded'>
 								{activeTab === "person" ? (
+									<Link to={`/person/${result.id}`}>
 									<div className='flex flex-col items-center'>
 										<img
 											src={ORIGINAL_IMAGE_BASE_URL + result.profile_path}
@@ -121,6 +122,7 @@ const SearchPage = () => {
 										/>
 										<h2 className='mt-2 text-xl font-bold'>{result.name}</h2>
 									</div>
+									</Link>
 								) : (
 									<Link
 										to={"/watch/" + result.id}
