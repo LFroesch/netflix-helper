@@ -10,26 +10,15 @@ import cookieParser from 'cookie-parser';
 import { protectRoute } from './middleware/protectRoute.js';
 import searchRoutes from './routes/search.route.js';
 import personRoutes from './routes/person.route.js';
+import path from 'path';
 
 dotenv.config();
 const app = express();
 const PORT = ENV_VARS.PORT
+const __dirname = path.resolve();
+
 app.use(express.json()); // Middleware to parse JSON bodies
 app.use(cookieParser())
-
-app.get('/', (req, res) => {
-    res.send(`
-        <h1>Hello World!</h1>
-        <ul>
-            <li><a href="/api/v1/auth/signup">Signup</a></li>
-            <li><a href="/api/v1/auth/login">Login</a></li>
-            <li><a href="/api/v1/auth/logout">Logout</a></li>
-        </ul>
-    `);
-});
-
-
-
 
 app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/movie", protectRoute, movieRoutes);
@@ -37,9 +26,14 @@ app.use("/api/v1/tv", protectRoute, tvRoutes);
 app.use("/api/v1/search", protectRoute, searchRoutes);
 app.use("/api/v1/person", protectRoute, personRoutes);
 
+if(process.env.NODE_ENV === 'production') {
+    app.use(express.static(path.join(__dirname, '/frontend/dist')));
 
+    app.get('*', (req, res) => {
+        res.sendFile(path.resolve(__dirname, 'frontend', 'dist', 'index.html'));
+    })
+}
 
-console.log("MONGO_URI: ", process.env.MONGO_URI);
 app.listen(PORT, () => {
     console.log('Server is running on http://localhost:' + PORT);
     connectDB();

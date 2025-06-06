@@ -17,6 +17,7 @@ const WatchPage = () => {
     const [loading, setLoading] = useState(true);
     const [content, setContent] = useState({});
     const [similarContent, setSimilarContent] = useState([]);
+    const [credits, setCredits] = useState(null);
     const {contentType} = useContentStore();
 
     const sliderRef = useRef(null);
@@ -55,7 +56,7 @@ const WatchPage = () => {
         getSimilarContent();
     }, [id, contentType]);
 
-        useEffect(() => {
+    useEffect(() => {
         const getContentDetails = async () => {
             try {
                 const res = await axios.get(`/api/v1/${contentType}/${id}/details`);
@@ -69,6 +70,24 @@ const WatchPage = () => {
                 }
             };
         getContentDetails();
+    }, [id, contentType]);
+
+    useEffect(() => {
+        const getCredits = async () => {
+            try {
+                const res = await axios.get(`/api/v1/${contentType}/${id}/credits`);
+                setCredits(res.data.content);
+                console.log("Credits:", res.data.content);
+            } catch (error) {
+                if(error.message.includes("404")) {
+                    console.error("No credits found for this content");
+                    setCredits(null);
+                } else {
+                    console.error("Error fetching credits:", error);
+                }
+            }
+        };
+        getCredits();
     }, [id, contentType]);
 
     const handlePrev = () => {
@@ -186,6 +205,49 @@ const WatchPage = () => {
 						className='max-h-[600px] rounded-md'
 					/>
 				</div>
+
+                {/* Cast Section */}
+                {credits && credits.cast && credits.cast.length > 0 && (
+                    <div className='mt-12 max-w-6xl mx-auto'>
+                        <h3 className='text-3xl font-bold mb-6'>
+                            Cast <span className='text-xl text-gray-400'>({credits.cast.filter(person => {
+                                return person.profile_path && 
+                                        person.character && 
+                                        !person.character.toLowerCase().includes('uncredited');
+                            }).length} Members)</span>
+                        </h3>
+                        <div className='grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4'>
+                            {credits.cast
+                                .filter(person => {
+                                    // Filter for relevant cast members
+                                    return person.profile_path && 
+                                            person.character && 
+                                            !person.character.toLowerCase().includes('uncredited');
+                                })
+                                .slice(0, 12) // Limit to 12 cast members
+                                .map((person) => (
+                                    <Link 
+                                        key={person.id} 
+                                        to={`/person/${person.id}`}
+                                        className='group'
+                                    >
+                                        <div className='relative overflow-hidden rounded-lg'>
+                                            <img
+                                                src={SMALL_IMAGE_BASE_URL + person.profile_path}
+                                                alt={person.name}
+                                                className='w-full h-auto transition-transform duration-300 group-hover:scale-105'
+                                            />
+                                            <div className='absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition-opacity duration-300' />
+                                        </div>
+                                        <h4 className='mt-2 text-sm font-semibold line-clamp-2'>{person.name}</h4>
+                                        {person.character && (
+                                            <p className='text-xs text-gray-400 line-clamp-1'>as {person.character}</p>
+                                        )}
+                                    </Link>
+                                ))}
+                        </div>
+                    </div>
+                )}
                 
 				{similarContent.length > 0 && (
 					<div className='mt-12 max-w-5xl mx-auto relative'>
