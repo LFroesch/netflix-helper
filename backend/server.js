@@ -11,6 +11,7 @@ import { protectRoute } from './middleware/protectRoute.js';
 import searchRoutes from './routes/search.route.js';
 import personRoutes from './routes/person.route.js';
 import watchlistRoutes from './routes/watchlist.route.js';
+import profileRoutes from './routes/profile.route.js';
 import path from 'path';
 
 dotenv.config();
@@ -27,6 +28,7 @@ app.use("/api/v1/tv", protectRoute, tvRoutes);
 app.use("/api/v1/search", protectRoute, searchRoutes);
 app.use("/api/v1/person", protectRoute, personRoutes);
 app.use("/api/v1/watchlist", protectRoute, watchlistRoutes);
+app.use("/api/v1/profile", protectRoute, profileRoutes);
 
 if(process.env.NODE_ENV === 'production') {
     app.use(express.static(path.join(__dirname, '/frontend/dist')));

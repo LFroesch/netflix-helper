@@ -19,6 +19,11 @@ const userSchema = mongoose.Schema({
         type: String,
         default: "",
     },
+    bio: {
+        type: String,
+        default: "",
+        maxlength: 500,
+    },
     searchHistory: {
         type: Array,
         default: [],
