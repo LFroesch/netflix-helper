@@ -11,7 +11,7 @@ const InfoPage = () => {
                 {/* Hero Section */}
                 <div className="text-center py-16 max-w-4xl mx-auto">
                     <h1 className="text-6xl font-bold mb-6 bg-gradient-to-r from-red-500 to-red-700 bg-clip-text text-transparent">
-                        Welcome to Netflix Helper
+                        Welcome to Streaming Helper
                     </h1>
                     <p className="text-xl text-gray-300 mb-8 leading-relaxed">
                         Discover, watch, and organize your favorite movies and TV shows. 

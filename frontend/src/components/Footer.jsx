@@ -20,7 +20,7 @@ const Footer = () => {
 					>
 						GitHub
 					</a>
-					.
+					. DISCLAIMER: This project is not affiliated with any streaming service and is for educational purposes only.
 				</p>
 			</div>
 		</footer>
