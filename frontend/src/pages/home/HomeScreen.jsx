@@ -1,17 +1,27 @@
-import { Link } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
 import Navbar from '../../components/Navbar.jsx'
 import { Info, Star, Clock } from 'lucide-react'
 import useGetTrendingContent from '../../hooks/useGetTrendingContent.jsx'
 import { MOVIE_CATEGORIES, ORIGINAL_IMAGE_BASE_URL, TV_CATEGORIES } from '../../utils/constants.js'
 import { useContentStore } from '../../store/content.js'
 import MovieSlider from '../../components/MovieSlider.jsx'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 
 const HomeScreen = () => {
     const { trendingContent } = useGetTrendingContent();
     const {contentType } = useContentStore();
     const [imgLoading, setImgLoading] = useState(true);
     
+    const [searchParams] = useSearchParams();
+    const { setContentType } = useContentStore();
+
+    useEffect(() => {
+        const type = searchParams.get('type');
+        if (type === 'tv' || type === 'movie') {
+            setContentType(type);
+        }
+    }, [searchParams, setContentType]);
+
     // Helper function to format runtime
     const formatRuntime = (minutes) => {
         if (!minutes) return null;

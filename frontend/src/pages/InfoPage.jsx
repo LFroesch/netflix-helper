@@ -23,7 +23,7 @@ const InfoPage = () => {
                 <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
                     
                     {/* Browse Movies */}
-                    <Link to="/" onClick={() => window.dispatchEvent(new CustomEvent('setContentType', { detail: 'movie' }))}>
+                    <Link to="/?type=movie" onClick={() => window.dispatchEvent(new CustomEvent('setContentType', { detail: 'movie' }))}>
                         <div className="bg-gray-900/50 p-8 rounded-xl border border-gray-800 hover:border-red-500 transition-all duration-300 hover:scale-105 group cursor-pointer h-full flex flex-col">
                             <div className="flex items-center mb-4">
                                 <Film className="text-red-500 mr-3 group-hover:text-red-400" size={32} />
@@ -36,7 +36,7 @@ const InfoPage = () => {
                     </Link>
 
                     {/* Browse TV Shows */}
-                    <Link to="/" onClick={() => window.dispatchEvent(new CustomEvent('setContentType', { detail: 'tv' }))}>
+                    <Link to="/?type=tv" onClick={() => window.dispatchEvent(new CustomEvent('setContentType', { detail: 'tv' }))}>
                         <div className="bg-gray-900/50 p-8 rounded-xl border border-gray-800 hover:border-blue-500 transition-all duration-300 hover:scale-105 group cursor-pointer h-full flex flex-col">
                             <div className="flex items-center mb-4">
                                 <Tv className="text-blue-500 mr-3 group-hover:text-blue-400" size={32} />
