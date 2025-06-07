@@ -3,11 +3,12 @@ import { Link, useParams } from "react-router-dom"
 import { useContentStore } from "../store/content";
 import axios from "axios";
 import Navbar from "../components/Navbar";
-import { BanknoteArrowDown, BanknoteArrowUp, ChartNoAxesCombined, ChevronLeft, ChevronRight, CircleDollarSign, Star } from "lucide-react";
+import { BanknoteArrowDown, BanknoteArrowUp, ChartNoAxesCombined, ChevronLeft, ChevronRight, CircleDollarSign, Star, Bookmark, BookmarkCheck } from "lucide-react";
 import ReactPlayer from "react-player";
 import { ORIGINAL_IMAGE_BASE_URL, SMALL_IMAGE_BASE_URL } from "../utils/constants";
 import { formatReleaseDate } from "../utils/dateFunction";
 import WatchPageSkeleton from "../components/skeletons/WatchPageSkeleton";
+import toast from "react-hot-toast";
 
 
 const WatchPage = () => {
@@ -18,6 +19,8 @@ const WatchPage = () => {
     const [content, setContent] = useState({});
     const [similarContent, setSimilarContent] = useState([]);
     const [credits, setCredits] = useState(null);
+    const [isInWatchlist, setIsInWatchlist] = useState(false);
+    const [watchlistLoading, setWatchlistLoading] = useState(false);
     const {contentType} = useContentStore();
 
     const sliderRef = useRef(null);
@@ -90,6 +93,54 @@ const WatchPage = () => {
         };
         getCredits();
     }, [id, contentType]);
+
+    // Check watchlist status
+    useEffect(() => {
+        const checkWatchlistStatus = async () => {
+            try {
+                const res = await axios.get(`/api/v1/watchlist/status/${id}`);
+                setIsInWatchlist(res.data.isInWatchlist);
+            } catch (error) {
+                console.error("Error checking watchlist status:", error);
+            }
+        };
+        if (id) {
+            checkWatchlistStatus();
+        }
+    }, [id]);
+
+    const handleWatchlistToggle = async () => {
+        if (!content) return;
+        
+        setWatchlistLoading(true);
+        try {
+            if (isInWatchlist) {
+                // Remove from watchlist
+                await axios.delete(`/api/v1/watchlist/${id}`);
+                setIsInWatchlist(false);
+                toast.success("Removed from watchlist");
+            } else {
+                // Add to watchlist
+                await axios.post(`/api/v1/watchlist/add`, {
+                    id: parseInt(id),
+                    title: content.title || content.name,
+                    image: content.poster_path,
+                    type: contentType
+                });
+                setIsInWatchlist(true);
+                toast.success("Added to watchlist");
+            }
+        } catch (error) {
+            console.error("Error toggling watchlist:", error);
+            if (error.response?.data?.message) {
+                toast.error(error.response.data.message);
+            } else {
+                toast.error("Something went wrong");
+            }
+        } finally {
+            setWatchlistLoading(false);
+        }
+    };
 
     const handlePrev = () => {
         if (currentTrailerIdx > 0) {
@@ -303,6 +354,35 @@ const WatchPage = () => {
                                 </div>
                             </div>
                         )}
+
+                        {/* Watchlist Button */}
+                        <div className='mt-6'>
+                            <button
+                                onClick={handleWatchlistToggle}
+                                disabled={watchlistLoading}
+                                className={`flex items-center gap-2 px-6 py-3 rounded-lg font-semibold transition-all duration-300 ${
+                                    isInWatchlist
+                                        ? 'bg-green-600 hover:bg-green-700'
+                                        : 'bg-gray-600 hover:bg-gray-700'
+                                } ${watchlistLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
+                            >
+                                {watchlistLoading ? (
+                                    <div className='w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin' />
+                                ) : isInWatchlist ? (
+                                    <BookmarkCheck size={20} />
+                                ) : (
+                                    <Bookmark size={20} />
+                                )}
+                                <span>
+                                    {watchlistLoading 
+                                        ? 'Loading...' 
+                                        : isInWatchlist 
+                                            ? 'Remove from Watchlist' 
+                                            : 'Add to Watchlist'
+                                    }
+                                </span>
+                            </button>
+                        </div>
 
                         {/* Overview */}
 						<p className='mt-6 text-lg leading-relaxed'>{content?.overview}</p>

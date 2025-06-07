@@ -1,12 +1,12 @@
-import mongoose from 'mongoose';
+import mongoose from "mongoose";
 
-const userSchema = new mongoose.Schema({
+const userSchema = mongoose.Schema({
     username: {
         type: String,
         required: true,
         unique: true,
     },
-    email:{
+    email: {
         type: String,
         required: true,
         unique: true,
@@ -17,12 +17,16 @@ const userSchema = new mongoose.Schema({
     },
     image: {
         type: String,
-        default: ""
+        default: "",
     },
     searchHistory: {
         type: Array,
-        default: []
+        default: [],
     },
-})
+    watchlist: {
+        type: Array,
+        default: [],
+    }
+}, { timestamps: true });
 
 export const User = mongoose.model('User', userSchema);

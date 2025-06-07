@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom'
 import Navbar from '../../components/Navbar.jsx'
-import { Info, Play } from 'lucide-react'
+import { Info, Star, Clock } from 'lucide-react'
 import useGetTrendingContent from '../../hooks/useGetTrendingContent.jsx'
 import { MOVIE_CATEGORIES, ORIGINAL_IMAGE_BASE_URL, TV_CATEGORIES } from '../../utils/constants.js'
 import { useContentStore } from '../../store/content.js'
@@ -11,6 +11,14 @@ const HomeScreen = () => {
     const { trendingContent } = useGetTrendingContent();
     const {contentType } = useContentStore();
     const [imgLoading, setImgLoading] = useState(true);
+    
+    // Helper function to format runtime
+    const formatRuntime = (minutes) => {
+        if (!minutes) return null;
+        const hours = Math.floor(minutes / 60);
+        const mins = minutes % 60;
+        return hours > 0 ? `${hours}h ${mins}m` : `${mins}m`;
+    };
 
     if(!trendingContent) return (
         <div className='h-screen text-white relative'>
@@ -49,30 +57,68 @@ const HomeScreen = () => {
                         <h1 className='mt-4 text-6xl font-extrabold text-balance'>
                             {trendingContent?.title || trendingContent?.name}
                         </h1>
-                        <p className='mt-2 text-lg'>
-							{trendingContent?.release_date?.split("-")[0] ||
-								trendingContent?.first_air_date.split("-")[0]}{" "}
-							| {trendingContent?.adult ? "18+" : "PG-13"}
-						</p>
+                        
+                        {/* Enhanced info section with runtime, rating, and parental rating */}
+                        <div className='mt-4 flex flex-wrap items-center gap-4 text-lg'>
+                            <span>
+                                {trendingContent?.release_date?.split("-")[0] ||
+                                    trendingContent?.first_air_date?.split("-")[0]}
+                            </span>
+                            
+                            {/* Parental Rating */}
+                            <span>•</span>
+                            <span>
+                                {trendingContent?.adult ? (
+                                    <span className='bg-red-600 px-2 py-1 rounded text-sm font-semibold'>18+</span>
+                                ) : (
+                                    <span className='bg-green-600 px-2 py-1 rounded text-sm font-semibold'>PG-13</span>
+                                )}
+                            </span>
+
+                            {/* Runtime for movies */}
+                            {contentType === 'movie' && trendingContent?.runtime && (
+                                <>
+                                    <span>•</span>
+                                    <div className='flex items-center gap-1'>
+                                        <Clock className='size-4' />
+                                        <span>{formatRuntime(trendingContent.runtime)}</span>
+                                    </div>
+                                </>
+                            )}
+
+                            {/* Seasons info for TV shows */}
+                            {contentType === 'tv' && trendingContent?.number_of_seasons && (
+                                <>
+                                    <span>•</span>
+                                    <span>{trendingContent.number_of_seasons} Season{trendingContent.number_of_seasons !== 1 ? 's' : ''}</span>
+                                </>
+                            )}
+
+                            {/* Rating */}
+                            {trendingContent?.vote_average && (
+                                <>
+                                    <span>•</span>
+                                    <div className='flex items-center gap-1'>
+                                        <Star className='size-4 text-yellow-400 fill-yellow-400' />
+                                        <span className='font-semibold'>{trendingContent.vote_average.toFixed(1)}</span>
+                                    </div>
+                                </>
+                            )}
+                        </div>
+
                         <p className='mt-4 text-lg'>
                             {trendingContent?.overview.length > 200
 								? trendingContent?.overview.slice(0, 200) + "..."
 								: trendingContent?.overview}
                         </p>
                     </div>
+                    
+                    {/*More Info */}
                     <div className='flex mt-8'>
 						<Link
 							to={`/watch/${trendingContent?.id}`}
-							className='bg-white hover:bg-white/80 text-black font-bold py-2 px-4 rounded mr-4 flex
-							 items-center'
-						>
-							<Play className='size-6 mr-2 fill-black' />
-							Play
-						</Link>
-
-						<Link
-							to={`/watch/${trendingContent?.id}`}
-							className='bg-gray-500/70 hover:bg-gray-500 text-white py-2 px-4 rounded flex items-center'
+							className='bg-gray-500 hover:bg-red-700 text-white font-bold py-3 px-8 rounded-lg flex items-center
+                            transform transition-all duration-200 hover:scale-105 shadow-lg hover:shadow-xl'
 						>
 							<Info className='size-6 mr-2' />
 							More Info

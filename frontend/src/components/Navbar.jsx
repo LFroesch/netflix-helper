@@ -1,4 +1,4 @@
-import { LogOut, Menu, Search } from "lucide-react";
+import { LogOut, Menu, Search, Bookmark, Info } from "lucide-react";
 import { useState } from "react";
 import { Link } from "react-router-dom"
 import { useAuthStore } from "../store/authUser.js";
@@ -30,8 +30,16 @@ const Navbar = () => {
 						Tv Shows
 					</Link>
 					<p>{" "}</p>
+					<Link to='/watchlist' className='outline-double outline-1 outline-offset-4 hover:text-red-500'>
+						My Watchlist
+					</Link>
+					<p>{" "}</p>
 					<Link to='/history' className='outline-double outline-1 outline-offset-4 hover:text-red-500'>
 						Search History
+					</Link>
+					<p>{" "}</p>
+					<Link to='/info' className='outline-double outline-1 outline-offset-4 hover:text-red-500'>
+						Help
 					</Link>
 				</div>
 			</div>
@@ -39,6 +47,12 @@ const Navbar = () => {
 			<div className='flex gap-2 items-center z-50'>
 				<Link to={"/search"}>
 					<Search className='size-6 cursor-pointer' />
+				</Link>
+				<Link to={"/watchlist"}>
+					<Bookmark className='size-6 cursor-pointer hover:text-red-500 transition-colors' />
+				</Link>
+				<Link to={"/info"}>
+					<Info className='size-6 cursor-pointer hover:text-red-500 transition-colors' />
 				</Link>
 				<img src={user.image} alt='Avatar' className='h-8 rounded cursor-pointer'/>
 				<LogOut className='size-6 cursor-pointer' onClick={logout} />
@@ -50,14 +64,20 @@ const Navbar = () => {
 			{/* mobile navbar items */}
 			{isMobileMenuOpen && (
 				<div className='w-full sm:hidden mt-4 z-50 bg-black border rounded border-gray-800'>
-					<Link to={"/"} className='block hover:underline p-2' onClick={toggleMobileMenu}>
+					<Link to={"/"} className='block hover:underline p-2' onClick={() => {toggleMobileMenu(); setContentType("movie");}}>
 						Movies
 					</Link>
-					<Link to={"/"} className='block hover:underline p-2' onClick={toggleMobileMenu}>
+					<Link to={"/"} className='block hover:underline p-2' onClick={() => {toggleMobileMenu(); setContentType("tv");}}>
 						Tv Shows
+					</Link>
+					<Link to={"/watchlist"} className='block hover:underline p-2' onClick={toggleMobileMenu}>
+						My Watchlist
 					</Link>
 					<Link to={"/history"} className='block hover:underline p-2' onClick={toggleMobileMenu}>
 						Search History
+					</Link>
+					<Link to={"/info"} className='block hover:underline p-2' onClick={toggleMobileMenu}>
+						Help
 					</Link>
 				</div>
 			)}

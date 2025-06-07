@@ -12,6 +12,8 @@ import SearchPage from "./pages/SearchPage";
 import SearchHistoryPage from "./pages/SearchHistoryPage";
 import NotFoundPage from "./pages/NotFoundPage";
 import PersonPage from "./pages/PersonPage";
+import WatchlistPage from "./pages/WatchlistPage";
+import InfoPage from "./pages/InfoPage";
 
 
 function App() {
@@ -41,6 +43,8 @@ function App() {
       <Route path='/search' element={user ? <SearchPage /> : <Navigate to={"/login"} />} />
       <Route path='/history' element={user ? <SearchHistoryPage /> : <Navigate to={"/login"} />} />
       <Route path='/person/:id' element={user ? <PersonPage /> : <Navigate to={"/login"} />} />
+      <Route path='/watchlist' element={user ? <WatchlistPage /> : <Navigate to={"/login"} />} />
+      <Route path='/info' element={user ? <InfoPage /> : <Navigate to={"/login"} />} />
       <Route path='/*' element={user? <NotFoundPage/> : <Navigate to={"/login"} />}/>
 
     </Routes>
