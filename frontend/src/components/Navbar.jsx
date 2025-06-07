@@ -54,7 +54,9 @@ const Navbar = () => {
 				<Link to={"/info"}>
 					<Info className='size-6 cursor-pointer hover:text-red-500 transition-colors' />
 				</Link>
-				<img src={user.image} alt='Avatar' className='h-8 rounded cursor-pointer'/>
+				<Link to={"/profile"}>
+					<img src={user.image} alt='Avatar' className='h-8 rounded cursor-pointer hover:ring-2 hover:ring-red-500 transition-all'/>
+				</Link>
 				<LogOut className='size-6 cursor-pointer' onClick={logout} />
 				<div className='sm:hidden'>
 					<Menu className='size-6 cursor-pointer' onClick={toggleMobileMenu} />

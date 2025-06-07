@@ -14,6 +14,8 @@ import NotFoundPage from "./pages/NotFoundPage";
 import PersonPage from "./pages/PersonPage";
 import WatchlistPage from "./pages/WatchlistPage";
 import InfoPage from "./pages/InfoPage";
+import UserProfilePage from "./pages/UserProfilePage";
+import ProfilePage from "./pages/ProfilePage";
 
 
 function App() {
@@ -45,6 +47,8 @@ function App() {
       <Route path='/person/:id' element={user ? <PersonPage /> : <Navigate to={"/login"} />} />
       <Route path='/watchlist' element={user ? <WatchlistPage /> : <Navigate to={"/login"} />} />
       <Route path='/info' element={user ? <InfoPage /> : <Navigate to={"/login"} />} />
+      <Route path='/profile' element={user ? <ProfilePage /> : <Navigate to={"/login"} />} />
+      <Route path='/user/:id' element={user ? <UserProfilePage /> : <Navigate to={"/login"} />} />
       <Route path='/*' element={user? <NotFoundPage/> : <Navigate to={"/login"} />}/>
 
     </Routes>
