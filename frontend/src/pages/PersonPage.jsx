@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import axios from "axios";
 import Navbar from "../components/Navbar";
-import { ChevronDown, ChevronUp } from "lucide-react";
+import { Cake, ChevronDown, ChevronUp, MapPinHouse, Skull, Star } from "lucide-react";
 import { ORIGINAL_IMAGE_BASE_URL, SMALL_IMAGE_BASE_URL } from "../utils/constants";
 import { formatReleaseDate } from "../utils/dateFunction";
 import WatchPageSkeleton from "../components/skeletons/WatchPageSkeleton";
@@ -109,7 +109,7 @@ const PersonPage = () => {
                         <div className='mt-4 space-y-2'>
                             {person.birthday && (
                                 <div className='flex items-center gap-2 text-lg'>
-                                    <span className='text-blue-400'>🎂</span>
+                                    <Cake className='text-blue-400'/>
                                     <span className='text-gray-400'>Born:</span>
                                     <span className='text-white'>
                                         {formatReleaseDate(person.birthday)}
@@ -124,7 +124,7 @@ const PersonPage = () => {
                             
                             {person.place_of_birth && (
                                 <div className='flex items-center gap-2 text-lg'>
-                                    <span className='text-green-400'>📍</span>
+                                    <MapPinHouse className='text-green-400'/>
                                     <span className='text-gray-400'>Birthplace:</span>
                                     <span className='text-white'>{person.place_of_birth}</span>
                                 </div>
@@ -132,7 +132,7 @@ const PersonPage = () => {
                             
                             {person.deathday && (
                                 <div className='flex items-center gap-2 text-lg'>
-                                    <span className='text-red-400'>⚰️</span>
+                                    <Skull className='text-white'/>
                                     <span className='text-gray-400'>Died:</span>
                                     <span className='text-white'>{formatReleaseDate(person.deathday)}</span>
                                 </div>
@@ -140,7 +140,7 @@ const PersonPage = () => {
 
                             {person.popularity && (
                                 <div className='flex items-center gap-2 text-lg'>
-                                    <span className='text-yellow-400'>⭐</span>
+                                    <Star className='text-yellow-400'/>
                                     <span className='text-gray-400'>Popularity Score:</span>
                                     <span className='text-white'>{Math.round(person.popularity)}</span>
                                 </div>

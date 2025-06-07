@@ -92,12 +92,26 @@ export async function getSimilarTvs(req, res) {
 
 export async function getTvsByCategory(req, res) {
     const {category} = req.params;
+    const { pages = 3 } = req.query; // Default to 3 pages for categories
+    
     try {
-        const data = await fetchFromTMDB(`https://api.themoviedb.org/3/tv/${category}?language=en-US&page=1`);
-        const englishShows = data.results.filter(tv => tv.original_language === 'en');
+        const pageNumbers = Array.from({length: parseInt(pages)}, (_, i) => i + 1);
+        const promises = pageNumbers.map(page => 
+            fetchFromTMDB(`https://api.themoviedb.org/3/tv/${category}?language=en-US&page=${page}`)
+        );
+        
+        const responses = await Promise.all(promises);
+        const allResults = responses.flatMap(data => data.results);
+        
+        const englishShows = allResults
+            .filter(tv => tv.original_language === 'en')
+            .filter((tv, index, self) => index === self.findIndex(t => t.id === tv.id)); // Remove duplicates
+        
         res.status(200).json({
             success: true,
-            content: englishShows
+            content: englishShows,
+            totalPages: parseInt(pages),
+            totalResults: englishShows.length
         });
     } catch (error) {
         res.status(500).json({

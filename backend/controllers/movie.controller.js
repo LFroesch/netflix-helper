@@ -88,12 +88,26 @@ export async function getSimilarMovies(req, res) {
 
 export async function getMoviesByCategory(req, res) {
     const {category} = req.params;
+    const { pages = 3 } = req.query; // Default to 3 pages for categories
+    
     try {
-        const data = await fetchFromTMDB(`https://api.themoviedb.org/3/movie/${category}?language=en-US&page=1`);
-        const englishMovies = data.results.filter(movie => movie.original_language === 'en');
+        const pageNumbers = Array.from({length: parseInt(pages)}, (_, i) => i + 1);
+        const promises = pageNumbers.map(page => 
+            fetchFromTMDB(`https://api.themoviedb.org/3/movie/${category}?language=en-US&page=${page}`)
+        );
+        
+        const responses = await Promise.all(promises);
+        const allResults = responses.flatMap(data => data.results);
+        
+        const englishMovies = allResults
+            .filter(movie => movie.original_language === 'en')
+            .filter((movie, index, self) => index === self.findIndex(m => m.id === movie.id)); // Remove duplicates
+        
         res.status(200).json({
             success: true,
-            content: englishMovies
+            content: englishMovies,
+            totalPages: parseInt(pages),
+            totalResults: englishMovies.length
         });
     } catch (error) {
         res.status(500).json({
