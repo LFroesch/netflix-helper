@@ -3,7 +3,8 @@ import { fetchFromTMDB } from "../services/tmdb.service.js";
 export async function getTrendingTv(req, res) {
     try {
         const data = await fetchFromTMDB("https://api.themoviedb.org/3/trending/tv/day?language=en-US");
-        const randomTv = data.results[Math.floor(Math.random() * data.results.length)];
+        const englishShows = data.results.filter(tv => tv.original_language === 'en');
+        const randomTv = englishShows[Math.floor(Math.random() * englishShows.length)];
         res.json({
             success: true,
             content: randomTv
@@ -56,12 +57,30 @@ export async function getTvDetails(req, res) {
 
 export async function getSimilarTvs(req, res) {
     const {id} = req.params;
+    const { pages = 3 } = req.query; // Default to 3 pages, allow customization
+    
     try {
-        const data = await fetchFromTMDB(`https://api.themoviedb.org/3/tv/${id}/similar?language=en-US&page=1`);
-        const englishShows = data.results.filter(tv => tv.original_language === 'en');
+        // Fetch multiple pages
+        const pageNumbers = Array.from({length: pages}, (_, i) => i + 1);
+        const promises = pageNumbers.map(page => 
+            fetchFromTMDB(`https://api.themoviedb.org/3/tv/${id}/similar?language=en-US&page=${page}`)
+        );
+        
+        const responses = await Promise.all(promises);
+        
+        // Combine all results
+        const allResults = responses.flatMap(data => data.results);
+        
+        // Filter for English shows and remove duplicates
+        const englishShows = allResults
+            .filter(tv => tv.original_language === 'en')
+            .filter((tv, index, self) => index === self.findIndex(t => t.id === tv.id)); // Remove duplicates
+        
         res.status(200).json({
             success: true,
-            similar: englishShows
+            similar: englishShows,
+            totalPages: pages,
+            totalResults: englishShows.length
         });
     } catch (error) {
         res.status(500).json({

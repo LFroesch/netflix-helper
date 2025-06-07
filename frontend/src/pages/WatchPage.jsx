@@ -3,7 +3,7 @@ import { Link, useParams } from "react-router-dom"
 import { useContentStore } from "../store/content";
 import axios from "axios";
 import Navbar from "../components/Navbar";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { BanknoteArrowDown, BanknoteArrowUp, ChartNoAxesCombined, ChevronLeft, ChevronRight, CircleDollarSign, Star } from "lucide-react";
 import ReactPlayer from "react-player";
 import { ORIGINAL_IMAGE_BASE_URL, SMALL_IMAGE_BASE_URL } from "../utils/constants";
 import { formatReleaseDate } from "../utils/dateFunction";
@@ -44,6 +44,7 @@ const WatchPage = () => {
             try {
                 const res = await axios.get(`/api/v1/${contentType}/${id}/similar`);
                 setSimilarContent(res.data.similar);
+                console.log("Similar content:", res.data.similar);
             } catch (error) {
                 if(error.message.includes("404")) {
                     console.error("No similar content found for this content");
@@ -61,6 +62,7 @@ const WatchPage = () => {
             try {
                 const res = await axios.get(`/api/v1/${contentType}/${id}/details`);
                 setContent(res.data.content);
+                console.log(res.data.content);
             } catch (error) {
                 if(error.message.includes("404")) {
                     setContent(null);
@@ -77,7 +79,6 @@ const WatchPage = () => {
             try {
                 const res = await axios.get(`/api/v1/${contentType}/${id}/credits`);
                 setCredits(res.data.content);
-                console.log("Credits:", res.data.content);
             } catch (error) {
                 if(error.message.includes("404")) {
                     console.error("No credits found for this content");
@@ -100,7 +101,6 @@ const WatchPage = () => {
             setCurrentTrailerIdx(currentTrailerIdx + 1);
         }
     }; 
-    console.log(currentTrailerIdx)
 
     const scrollLeft = () => {
 		if (sliderRef.current) sliderRef.current.scrollBy({ left: -sliderRef.current.offsetWidth, behavior: "smooth" });
@@ -108,6 +108,27 @@ const WatchPage = () => {
 	const scrollRight = () => {
 		if (sliderRef.current) sliderRef.current.scrollBy({ left: sliderRef.current.offsetWidth, behavior: "smooth" });
 	};
+
+    // Helper function to format runtime
+    const formatRuntime = (minutes) => {
+        if (!minutes) return null;
+        const hours = Math.floor(minutes / 60);
+        const mins = minutes % 60;
+        return hours > 0 ? `${hours}h ${mins}m` : `${mins}m`;
+    };
+
+    // Helper function to format budget/revenue
+    const formatMoney = (amount) => {
+        if (!amount || amount === 0) return `N/A`;
+        if (amount >= 1000000000) {
+            return `$${(amount / 1000000000).toFixed(1)}B`;
+        } else if (amount >= 1000000) {
+            return `$${(amount / 1000000).toFixed(1)}M`;
+        } else if (amount >= 1000) {
+            return `$${(amount / 1000).toFixed(1)}K`;
+        }
+        return `$${amount.toLocaleString()}`;
+    };
 
     if (loading) return (
 			<div className='min-h-screen bg-black p-10'>
@@ -181,7 +202,7 @@ const WatchPage = () => {
 					)}
 				</div>
 
-                {/* movie details */}
+                {/* movie/tv details */}
 				<div
 					className='flex flex-col md:flex-row items-center justify-between gap-20 
 				max-w-6xl mx-auto'
@@ -189,15 +210,102 @@ const WatchPage = () => {
 					<div className='mb-4 md:mb-0'>
 						<h2 className='text-5xl font-bold text-balance'>{content?.title || content?.name}</h2>
 
-						<p className='mt-2 text-lg'>
-							{formatReleaseDate(content?.release_date || content?.first_air_date)} |{" "}
-							{content?.adult ? (
-								<span className='text-red-600'>18+</span>
-							) : (
-								<span className='text-green-600'>PG-13</span>
-							)}{" "}
-						</p>
-						<p className='mt-4 text-lg'>{content?.overview}</p>
+                        {/* Tagline */}
+                        {content?.tagline && (
+                            <p className='mt-3 text-xl italic text-gray-300'>"{content.tagline}"</p>
+                        )}
+
+                        {/* Basic Info Row */}
+						<div className='mt-4 flex flex-wrap items-center gap-4 text-lg'>
+							<span>
+                                {formatReleaseDate(content?.release_date || content?.first_air_date)}
+                            </span>
+                            <span>•</span>
+							<span>
+                                {content?.adult ? (
+                                    <span className='text-red-600'>18+</span>
+                                ) : (
+                                    <span className='text-green-600'>PG-13</span>
+                                )}
+                            </span>
+
+                            {/* Runtime for movies */}
+                            {contentType === 'movie' && content?.runtime && (
+                                <>
+                                    <span>•</span>
+                                    <span>{formatRuntime(content.runtime)}</span>
+                                </>
+                            )}
+
+                            {/* Seasons/Episodes for TV */}
+                            {contentType === 'tv' && (
+                                <>
+                                    {content?.number_of_seasons && (
+                                        <>
+                                            <span>•</span>
+                                            <span>{content.number_of_seasons} Season{content.number_of_seasons !== 1 ? 's' : ''}</span>
+                                        </>
+                                    )}
+                                    {content?.number_of_episodes && (
+                                        <>
+                                            <span>•</span>
+                                            <span>{content.number_of_episodes} Episodes</span>
+                                        </>
+                                    )}
+                                </>
+                            )}
+						</div>
+
+                        {/* Genres */}
+                        {content?.genres && content.genres.length > 0 && (
+                            <div className='mt-3'>
+                                <div className='flex flex-wrap gap-2'>
+                                    {content.genres.map((genre) => (
+                                        <span 
+                                            key={genre.id} 
+                                            className='px-3 py-1 bg-gray-800 rounded-full text-sm'
+                                        >
+                                            {genre.name}
+                                        </span>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Rating and Popularity */}
+                        {(content?.vote_average || content?.popularity) && (
+                            <div className='mt-4 flex flex-wrap items-center gap-6 text-lg'>
+                                {content?.vote_average && (
+                                    <div className='flex items-center gap-2'>
+                                        <Star className='text-yellow-400'/>
+                                        <span>{content.vote_average.toFixed(1)}/10</span>
+                                    </div>
+                                )}
+                                {content?.popularity && (
+                                    <div className='flex items-center gap-2'>
+                                        <ChartNoAxesCombined className='text-blue-400'/>
+                                        <span>Popularity Score: {Math.round(content.popularity)}</span>
+                                    </div>
+                                )}
+                            </div>
+                        )}
+
+                        {/* Budget and Revenue for movies */}
+                        {contentType === 'movie' && (
+                            <div className='mt-4 space-y-2'>
+                                <div className='flex items-center gap-2 text-lg'>
+                                    <BanknoteArrowUp className='text-green-400'/>
+                                    <span>Box Office: {formatMoney(content?.revenue)}</span>
+                                </div>
+                                <div className='flex items-center gap-2 text-lg'>
+                                    <BanknoteArrowDown className='text-red-500' />
+                                    <span>Budget: {formatMoney(content?.budget)}</span>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Overview */}
+						<p className='mt-6 text-lg leading-relaxed'>{content?.overview}</p>
 					</div>
 					<img
 						src={ORIGINAL_IMAGE_BASE_URL + content?.poster_path}
@@ -254,7 +362,14 @@ const WatchPage = () => {
 						<h3 className='text-3xl font-bold mb-4'>Similar Movies/Tv Show</h3>
 
 						<div className='flex overflow-x-scroll scrollbar-hide gap-4 pb-4 group' ref={sliderRef}>
-							{similarContent.map((content) => {
+							 {similarContent
+                            .filter((content) => {
+                                // Filter for quality similar content
+                                return content.poster_path && 
+                                    content.vote_count > 5 && // Minimum vote threshold for quality
+                                    content.original_language === 'en'; // English content only
+                            })
+                            .map((content) => {
 								if (content.poster_path === null) return null;
 								return (
 									<Link key={content.id} to={`/watch/${content.id}`} className='w-52 flex-none'>

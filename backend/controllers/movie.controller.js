@@ -3,7 +3,8 @@ import { fetchFromTMDB } from "../services/tmdb.service.js";
 export async function getTrendingMovie(req, res) {
     try {
         const data = await fetchFromTMDB("https://api.themoviedb.org/3/trending/movie/day?language=en-US");
-        const randomMovie = data.results[Math.floor(Math.random() * data.results.length)];
+        const englishMovies = data.results.filter(movie => movie.original_language === 'en');
+        const randomMovie = englishMovies[Math.floor(Math.random() * englishMovies.length)];
         res.json({
             success: true,
             content: randomMovie
@@ -56,15 +57,26 @@ export async function getMovieDetails(req, res) {
 
 export async function getSimilarMovies(req, res) {
     const {id} = req.params;
+    const { pages = 3 } = req.query; // Default to 3 pages
+    
     try {
-        const data = await fetchFromTMDB(`https://api.themoviedb.org/3/movie/${id}/similar?language=en-US&page=1`);
+        const pageNumbers = Array.from({length: pages}, (_, i) => i + 1);
+        const promises = pageNumbers.map(page => 
+            fetchFromTMDB(`https://api.themoviedb.org/3/movie/${id}/similar?language=en-US&page=${page}`)
+        );
         
-        // Filter for English movies only
-        const englishMovies = data.results.filter(movie => movie.original_language === 'en');
+        const responses = await Promise.all(promises);
+        const allResults = responses.flatMap(data => data.results);
+        
+        const englishMovies = allResults
+            .filter(movie => movie.original_language === 'en')
+            .filter((movie, index, self) => index === self.findIndex(m => m.id === movie.id));
         
         res.status(200).json({
             success: true,
-            similar: englishMovies
+            similar: englishMovies,
+            totalPages: pages,
+            totalResults: englishMovies.length
         });
     } catch (error) {
         res.status(500).json({
