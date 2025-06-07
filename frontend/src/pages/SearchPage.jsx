@@ -17,6 +17,26 @@ const SearchPage = () => {
 	const [searchParams] = useSearchParams();
 
 	useEffect(() => {
+		const termFromUrl = searchParams.get('term');
+		const typeFromUrl = searchParams.get('type');
+		
+		if (termFromUrl && typeFromUrl) {
+			setSearchTerm(termFromUrl);
+			setActiveTab(typeFromUrl);
+			setContentType(typeFromUrl === "movie" ? "movie" : "tv");
+			
+			// Automatically perform the search
+			performSearch(typeFromUrl, termFromUrl);
+		} else if (typeFromUrl && (typeFromUrl === 'person' || typeFromUrl === 'movie' || typeFromUrl === 'tv')) {
+			// Just set the tab if only type is provided
+			setActiveTab(typeFromUrl);
+			if (typeFromUrl !== 'person') {
+				setContentType(typeFromUrl === "movie" ? "movie" : "tv");
+			}
+		}
+	}, [searchParams, setContentType]);
+
+	useEffect(() => {
         const termFromUrl = searchParams.get('term');
         const typeFromUrl = searchParams.get('type');
         

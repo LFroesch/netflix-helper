@@ -75,7 +75,7 @@ const InfoPage = () => {
                     </Link>
 
                     {/* Actor Profiles */}
-                    <Link to="/search">
+                    <Link to="/search?type=person">
                         <div className="bg-gray-900/50 p-8 rounded-xl border border-gray-800 hover:border-yellow-500 transition-all duration-300 hover:scale-105 group cursor-pointer h-full flex flex-col">
                             <div className="flex items-center mb-4">
                                 <Users className="text-yellow-500 mr-3 group-hover:text-yellow-400" size={32} />
